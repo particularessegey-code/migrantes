@@ -3,538 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Captura de Alumnos - Base de Datos Escolar</title>
+    <title>Mantenimiento - Captura de Alumnos</title>
     <style>
-        /* --- VARIABLES & RESET --- */
-        :root {
-            --primary: #1e40af;       /* Azul Institucional */
-            --primary-dark: #1e3a8a;
-            --primary-light: #3b82f6;
-            --accent: #802434;        /* Rojo/Burgundy para Login (según tu diseño previo) */
-            --bg: #f1f5f9;
-            --card-bg: #ffffff;
-            --text: #334155;
-            --text-light: #64748b;
-            --border: #cbd5e1;
-            --success: #10b981;
-            --danger: #ef4444;
-            --radius: 12px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #802434; /* Fondo Guinda */
+            color: white;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        * { box-sizing: border-box; }
-        
-        body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
-            margin: 0; 
-            padding: 20px; 
-            min-height: 100vh;
+        .container {
+            text-align: center;
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+            border-top: 10px solid #5e1a28;
         }
 
-        .container { max-width: 1000px; margin: 0 auto; }
-        
-        /* --- TARJETAS --- */
-        .card { 
-            background: var(--card-bg); 
-            padding: 25px; 
-            border-radius: var(--radius); 
-            box-shadow: var(--shadow); 
-            margin-bottom: 20px; 
-            border: 1px solid var(--border); 
-        }
-        
-        h1 { color: var(--primary); text-align: center; margin-bottom: 5px; font-size: 1.8rem; }
-        h2 { font-size: 1.25rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; color: var(--primary-dark); margin-top: 0; }
-        p { color: var(--text-light); line-height: 1.5; }
-        
-        /* --- ELEMENTOS DE FORMULARIO --- */
-        .search-bar { display: flex; gap: 10px; margin-bottom: 15px; }
-        
-        input, select { 
-            width: 100%; 
-            padding: 10px 12px; 
-            border: 1px solid var(--border); 
-            border-radius: 8px; 
-            font-size: 1rem; 
-            transition: all 0.2s;
-        }
-        
-        input:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        
-        input[readonly] { 
-            background-color: #f8fafc; 
-            color: #94a3b8; 
-            border-color: transparent; 
-            font-weight: 500; 
-            cursor: default;
+        h1 {
+            color: #802434;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
         }
 
-        /* Estilo para campos bloqueados (ya capturados) */
-        input.locked-field { 
-            background-color: #e2e8f0; 
-            color: #475569; 
-            border-color: #cbd5e1; 
-            cursor: not-allowed; 
-            font-weight: 600; 
+        p {
+            color: #475569;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
         }
 
-        /* --- BOTONES --- */
-        .btn { 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            transition: background 0.2s, transform 0.1s; 
-            display: inline-flex; align-items: center; justify-content: center;
-        }
-        .btn:active { transform: scale(0.98); }
-
-        .btn-primary { background: var(--primary); color: white; padding: 12px 24px; }
-        .btn-primary:hover { background: var(--primary-dark); }
-
-        .btn-success { background: var(--success); color: white; padding: 12px 30px; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2); width: 100%; }
-        .btn-success:hover:not(:disabled) { background: #059669; }
-        .btn-success:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.7; box-shadow: none; }
-
-        .btn-danger { background: var(--danger); color: white; padding: 12px 30px; font-size: 1rem; }
-        .btn-danger:hover { background: #dc2626; }
-
-        /* --- RESULTADOS DE BÚSQUEDA --- */
-        #resultsList { margin-top: 15px; }
-        .result-item { 
-            padding: 15px; 
-            border: 1px solid var(--border); 
-            border-radius: 8px; 
-            margin-bottom: 10px; 
-            cursor: pointer; 
-            background: #fff; 
-            transition: all 0.2s; 
-            border-left: 4px solid transparent; 
-        }
-        .result-item:hover { border-left-color: var(--primary); transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        
-        .result-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-top: 4px; }
-        .badge-cct { background: #e2e8f0; color: #475569; }
-        .badge-turno { background: #fee2e2; color: #991b1b; }
-
-        /* --- GRID DEL FORMULARIO --- */
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .full-width { grid-column: 1 / -1; }
-        
-        label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-light); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .section-divider { 
-            grid-column: 1 / -1; 
-            margin: 20px 0 10px 0; 
-            padding-top: 15px; 
-            border-top: 1px dashed var(--border); 
-            color: var(--primary); 
-            font-weight: 800; 
-            font-size: 0.9rem; 
-            display: flex; align-items: center; gap: 10px;
+        /* Animación del Círculo de Carga */
+        .spinner {
+            border: 8px solid #f3f4f6;
+            border-top: 8px solid #802434;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
         }
 
-        /* --- LOGIN VIEW --- */
-        #login-view { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: url('particulares.jpg') no-repeat center center fixed; 
-            background-size: cover; 
-            display: flex; justify-content: center; align-items: center; z-index: 5000; 
-        }
-        
-        /* Overlay oscuro para legibilidad */
-        #login-view::before {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(30, 41, 59, 0.7); z-index: -1;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .login-card { 
-            background: rgba(255, 255, 255, 0.95); 
-            padding: 40px; 
-            border-radius: 12px; 
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); 
-            text-align: center; 
-            width: 90%; 
-            max-width: 400px; 
-            backdrop-filter: blur(5px);
+        .status-text {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            font-style: italic;
         }
-        
-        .login-card h2 { color: var(--accent); margin-top: 0; border: none; font-size: 1.5rem; }
-        .login-card input { margin-bottom: 15px; background: white; }
-        
-        .btn-login { background: var(--accent); color: white; width: 100%; padding: 12px; font-size: 1rem; }
-        .btn-login:hover { background: #5e1a28; }
 
-        /* --- ESTADOS --- */
-        .hidden { display: none !important; }
-        #formSection.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(0.5); transition: all 0.3s; }
-
-        /* --- TOAST --- */
-        #toast { position: fixed; bottom: 30px; right: 30px; background: #333; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 500; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        #toast.show { opacity: 1; transform: translateY(-5px); }
-        #toast.success { background: var(--success); }
-        #toast.error { background: var(--danger); }
-
-        /* Loader simple */
-        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; margin-right: 8px; vertical-align: middle;}
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        @media (max-width: 600px) {
-            .search-bar { flex-direction: column; }
-            .result-header { flex-direction: column; gap: 5px; }
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
         }
     </style>
 </head>
 <body>
 
-    <!-- VISTA LOGIN -->
-    <div id="login-view">
-      <div class="login-card">
-        <h2>Acceso Restringido</h2>
-        <input type="text" id="username" placeholder="Usuario" autocomplete="off">
-        <input type="password" id="password" placeholder="Contraseña" autocomplete="off">
-        <button class="btn btn-login" onclick="checkLogin()" id="btnLoginAction">Iniciar Sesión</button>
-        <div id="login-error" style="color: #d32f2f; margin-top: 15px; font-weight: bold; font-size: 0.9rem;"></div>
-      </div>
-    </div>
-
-    <!-- VISTA APLICACIÓN -->
-    <div id="app-view" class="hidden">
-        <div class="container">
-            <header style="text-align: center; margin-bottom: 30px;">
-                <h1>Registro de Alumnos Migrantes</h1>
-                <p>Seleccione una escuela para actualizar sus estadísticas.</p>
-            </header>
-
-            <!-- SECCIÓN BÚSQUEDA -->
-            <div class="card">
-                <h2>🔍 1. Buscar Escuela</h2>
-                <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Escriba la Clave CCT (ej: 31PES...)" onkeypress="if(event.key === 'Enter') searchSchool()">
-                    <button class="btn btn-primary" onclick="searchSchool()" id="btnSearch">Buscar</button>
-                </div>
-                <div id="resultsList"></div>
-            </div>
-
-            <!-- SECCIÓN CAPTURA -->
-            <div class="card disabled" id="formSection">
-                <h2>📝 2. Datos de la Escuela</h2>
-                <form id="captureForm" onsubmit="event.preventDefault(); saveData();">
-                    <input type="hidden" id="rowIndex">
-
-                    <div class="form-grid">
-                        <!-- DATOS DE LECTURA (Referencia) -->
-                        <div class="section-divider">Información de la Escuela</div>
-                        
-                        <div><label>NUM</label><input type="text" id="disp_num" readonly></div>
-                        <div><label>CLAVE C.C.T.</label><input type="text" id="disp_cct" readonly style="font-weight:bold; color:var(--primary);"></div>
-                        <div class="full-width"><label>NOMBRE ESCUELA</label><input type="text" id="disp_nombre" readonly></div>
-                        <div><label>NIVEL</label><input type="text" id="disp_nivel" readonly></div>
-                        <div><label>TURNO</label><input type="text" id="disp_turno" readonly style="color: var(--accent); font-weight: bold;"></div>
-                        
-                        <div class="section-divider">Ubicación</div>
-                        <div class="full-width"><label>MUNICIPIO</label><input type="text" id="disp_municipio" readonly></div>
-                        <div class="full-width"><label>LOCALIDAD</label><input type="text" id="disp_localidad" readonly></div>
-                        <div class="full-width"><label>DIRECCIÓN</label><input type="text" id="disp_direccion" readonly></div>
-                        <div><label>ÁREA</label><input type="text" id="disp_area" readonly></div>
-                        <div><label>VISITADOR</label><input type="text" id="disp_visitador" readonly></div>
-
-                        <!-- DATOS DE CAPTURA -->
-                        <div class="section-divider">⬇️ Captura de Estadísticas</div>
-
-                        <!-- Nota: Estos IDs deben coincidir con la lógica JS -->
-                        <div><label>ALUMNOS MIGRANTES NACIONALES HOMBRES</label><input type="number" id="field_total" required min="0"></div>
-                        <div><label>ALUMNOS MIGRANTES NACIONALES MUJER</label><input type="number" id="field_mujeres" required min="0"></div>
-                        <div><label>ALUMNOS MIGRANTES EXTRANJEROS HOMBRES</label><input type="number" id="field_hombres" required min="0"></div>
-                        <div><label>ALUMNOS MIGRANTES EXTRANJEROS MUJER</label><input type="number" id="field_discapacidad" required min="0"></div>
-                    </div>
-
-                    <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: flex-end;">
-                        <button type="submit" class="btn btn-success" id="btnSave">Guardar Datos</button>
-                        <button type="button" class="btn btn-danger hidden" id="btnLogout" onclick="logout()">Salir</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- TOAST NOTIFICACIONES -->
-    <div id="toast">Mensaje de notificación</div>
-
-            <script>
-        // =====================================================
-        // CONFIGURACIÓN
-        // =====================================================
-        // 🔗 URL DE TU APP SCRIPT
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_JVhzk_A-DOl26EecJ1sWVQfSBBGiysyOOmz0Vn7sNoAO8dOL-6EhsC4nio2H6Elr/exec";
-
-        // =====================================================
-        // LÓGICA DE LOGIN (Mantiene tu seguridad con Token)
-        // =====================================================
-        async function checkLogin() {
-            const user = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value.trim();
-            const btn = document.getElementById('btnLoginAction');
-            const errorDiv = document.getElementById('login-error');
-
-            if(!user || !pass) return errorDiv.innerText = "Ingrese usuario y contraseña";
-
-            const originalBtnText = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner"></span> Verificando...';
-            btn.disabled = true;
-            errorDiv.innerText = "";
-            
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    redirect: 'follow',
-                    body: JSON.stringify({ action: 'login', user: user, pass: pass })
-                });
-                
-                const rawText = await response.text();
-                const data = JSON.parse(rawText);
-
-                if (data.success) {
-                    // Guardamos el Token de seguridad
-                    sessionStorage.setItem('authToken', data.token);
-                    sessionStorage.setItem('isLoggedIn', 'true');
-                    showApp();
-                } else {
-                    errorDiv.innerText = data.message || "Credenciales incorrectas";
-                    document.getElementById('password').value = '';
-                    document.getElementById('password').focus();
-                }
-            } catch (error) {
-                console.error(error);
-                errorDiv.innerText = "Error de conexión con el servidor";
-            } finally {
-                btn.innerHTML = originalBtnText;
-                btn.disabled = false;
-            }
-        }
-
-        function showApp() {
-            document.getElementById('login-view').style.display = 'none';
-            document.getElementById('app-view').classList.remove('hidden');
-        }
-
-        function logout() {
-            sessionStorage.removeItem('authToken');
-            sessionStorage.removeItem('isLoggedIn');
-            location.reload(); 
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('isLoggedIn') === 'true' && sessionStorage.getItem('authToken')) {
-                showApp();
-            }
-            document.getElementById('password').addEventListener('keyup', e => { 
-                if(e.key==='Enter') checkLogin(); 
-            });
-        });
-
-        // =====================================================
-        // LÓGICA DE BÚSQUEDA
-        // =====================================================
-        async function searchSchool() {
-            const query = document.getElementById('searchInput').value.trim();
-            const resultsDiv = document.getElementById('resultsList');
-            const formSection = document.getElementById('formSection');
-            const btnSearch = document.getElementById('btnSearch');
-
-            if (!query) return alert("Por favor ingrese una clave CCT");
-
-            formSection.classList.add('disabled'); 
-            btnSearch.disabled = true;
-            btnSearch.innerHTML = '<span class="spinner"></span> Buscando...';
-            resultsDiv.innerHTML = '';
-
-            try {
-                const response = await fetch(`${SCRIPT_URL}?q=${query}`, { redirect: 'follow' });
-                const data = await response.json();
-                
-                if (data.error) throw new Error(data.error);
-                
-                if (!data || data.length === 0) {
-                    resultsDiv.innerHTML = '<div style="padding:15px; text-align:center; color:#64748b;">No se encontraron resultados.</div>';
-                    return;
-                }
-
-                let html = '<p style="margin-bottom:10px; font-weight:600; color:var(--primary);">Resultados encontrados:</p>';
-                data.forEach(row => {
-                    html += `
-                    <div class="result-item" onclick="selectSchool(${JSON.stringify(row).replace(/"/g, '&quot;')})">
-                        <div class="result-header">
-                            <div style="flex:1;">
-                                <strong style="font-size:1.05rem;">${row.nombre}</strong>
-                            </div>
-                            <div style="text-align:right;">
-                                <span class="badge badge-cct">${row.cct}</span><br>
-                                <span class="badge badge-turno">${row.turno}</span>
-                            </div>
-                        </div>
-                        <div style="margin-top:5px; font-size:0.9rem; color:var(--text-light);">
-                            ${row.municipio}, ${row.localidad} &bull; ${row.nivel}
-                        </div>
-                    </div>
-                    `;
-                });
-                resultsDiv.innerHTML = html;
-
-            } catch (error) {
-                console.error(error);
-                resultsDiv.innerHTML = `<div style="color:var(--danger); padding:15px; text-align:center;">Error: ${error.message}</div>`;
-            } finally {
-                btnSearch.disabled = false;
-                btnSearch.innerHTML = 'Buscar';
-            }
-        }
-
-        // =====================================================
-        // LÓGICA DE SELECCIÓN
-        // =====================================================
+    <div class="container">
+        <!-- Icono de Herramientas -->
+        <div class="icon">🛠️</div>
         
-        function setFieldState(elementId, value) {
-            const input = document.getElementById(elementId);
-            if (value && value !== "" && value !== 0) {
-                input.value = value;
-                input.readOnly = true;
-                input.classList.add('locked-field');
-                return true;
-            } else {
-                input.value = "";
-                input.readOnly = false;
-                input.classList.remove('locked-field');
-                return false;
-            }
-        }
+        <h1>Captura de Alumnos Migrantes</h1>
+        
+        <p>
+            La captura de alumnos migrantes de nivel secundaria finalizó satisfactoriamente con el 100% de las escuelas capturadas..
+        </p>
+        <p>
+            Gracias...
+        </p>
 
-        function selectSchool(data) {
-            // 1. Llenar campos de referencia
-            document.getElementById('rowIndex').value = data.rowIndex;
-            document.getElementById('disp_num').value = data.num;
-            document.getElementById('disp_cct').value = data.cct;
-            document.getElementById('disp_nombre').value = data.nombre;
-            document.getElementById('disp_nivel').value = data.nivel;
-            document.getElementById('disp_turno').value = data.turno;
-            document.getElementById('disp_municipio').value = data.municipio;
-            document.getElementById('disp_localidad').value = data.localidad;
-            document.getElementById('disp_direccion').value = data.direccion;
-            document.getElementById('disp_area').value = data.area;
-            document.getElementById('disp_visitador').value = data.visitador;
+        <div class="spinner"></div>
+        <div class="status-text">Verificando conexión...</div>
+    </div>
 
-            // 2. Cargar los 4 campos de captura
-            const isTotalSaved = setFieldState('field_total', data.total);
-            const isMujeresSaved = setFieldState('field_mujeres', data.mujeres);
-            const isHombresSaved = setFieldState('field_hombres', data.hombres);
-            const isDiscSaved = setFieldState('field_discapacidad', data.discapacidad);
-
-            // 3. Controlar botones
-            const btnSave = document.getElementById('btnSave');
-            const btnLogout = document.getElementById('btnLogout');
-
-            if (isTotalSaved || isMujeresSaved || isHombresSaved || isDiscSaved) {
-                btnSave.disabled = true;
-                btnSave.innerText = "Datos ya registrados";
-                btnLogout.classList.remove('hidden');
-            } else {
-                btnSave.disabled = false;
-                btnSave.innerText = "Guardar Datos";
-                btnLogout.classList.add('hidden');
-                setTimeout(() => document.getElementById('field_total').focus(), 100);
-            }
-
-            // 4. Mostrar formulario
-            document.getElementById('formSection').classList.remove('disabled');
-            document.getElementById('resultsList').innerHTML = ""; 
-            document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // =====================================================
-        // LÓGICA DE GUARDADO (Sin validación obsoleta)
-        // =====================================================
-        async function saveData() {
-            const btn = document.getElementById('btnSave');
-            const token = sessionStorage.getItem('authToken');
-
-            // Se eliminó la validación de suma porque los campos ahora son independientes
-
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Guardando...';
-
-            const payload = {
-                action: 'save',
-                token: token, // Enviamos el Token de seguridad
-                rowIndex: document.getElementById('rowIndex').value,
-                total: document.getElementById('field_total').value,
-                mujeres: document.getElementById('field_mujeres').value,
-                hombres: document.getElementById('field_hombres').value,
-                discapacidad: document.getElementById('field_discapacidad').value,
-                maya: "" // Enviamos vacío
-            };
-
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    redirect: 'follow',
-                    body: JSON.stringify(payload)
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showToast("✅ Datos guardados correctamente", "success");
-                    
-                    const currentData = {
-                        rowIndex: payload.rowIndex,
-                        num: document.getElementById('disp_num').value,
-                        cct: document.getElementById('disp_cct').value,
-                        nombre: document.getElementById('disp_nombre').value,
-                        nivel: document.getElementById('disp_nivel').value,
-                        turno: document.getElementById('disp_turno').value,
-                        municipio: document.getElementById('disp_municipio').value,
-                        localidad: document.getElementById('disp_localidad').value,
-                        direccion: document.getElementById('disp_direccion').value,
-                        area: document.getElementById('disp_area').value,
-                        visitador: document.getElementById('disp_visitador').value,
-                        total: payload.total,
-                        mujeres: payload.mujeres,
-                        hombres: payload.hombres,
-                        discapacidad: payload.discapacidad,
-                        maya: "" 
-                    };
-                    
-                    selectSchool(currentData); 
-                } else {
-                    showToast("❌ " + (data.error || data.message), "error");
-                    if(data.error && data.error.includes("Sesión")) {
-                        setTimeout(() => logout(), 2000);
-                    } else {
-                        btn.disabled = false;
-                        btn.innerHTML = "Guardar Datos";
-                    }
-                }
-            } catch (error) {
-                console.error(error);
-                showToast("❌ Error de conexión", "error");
-                btn.disabled = false;
-                btn.innerHTML = "Guardar Datos";
-            }
-        }
-
-        function showToast(msg, type) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.className = type + ' show';
-            setTimeout(() => { t.className = type; }, 3000);
-        }
+    <script>
+        // Esta función recargará la página cada 30 segundos
+        // para que, cuando termines de cambiar el código, 
+        // el usuario entre automáticamente a la aplicación.
+        setInterval(function() {
+            location.reload();
+        }, 30000); // 30000 milisegundos = 30 segundos
     </script>
 </body>
-
 </html>
-
